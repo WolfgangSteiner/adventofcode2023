@@ -30,6 +30,7 @@ static inline s64 max_s64(s64 a, s64 b) { return a > b ? a : b; }
 
 
 int str_to_int(str_t str);
+s64 str_to_s64(str_t str);
 char str_at(str_t str, int idx);
 char str_get_char(str_t str, size_t pos);
 bool str_contains(str_t, str_t);

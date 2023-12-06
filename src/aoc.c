@@ -154,6 +154,17 @@ int str_to_int(str_t str) {
     return res;
 }
 
+s64 str_to_s64(str_t str)
+{
+    int res = 0;
+    for (int i = 0; i < str.size; ++i) {
+        char c = str_at(str, i);        
+        assert(is_digit(c));
+        res = 10 * res + char_to_int(c);
+    }   
+    return res;
+}
+
 char str_get_char(str_t str, size_t pos) { return str.data[pos]; }
 char str_iter_get_char(str_iter_t* iter) { return iter->str->data[iter->pos]; }
 void str_iter_inc(str_iter_t* iter) { iter->pos++; }
