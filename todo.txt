@@ -1,0 +1,5 @@
+* move range to separate inc/src
+* move str_format code to separate src
+* move path functions to aoc
+* move cmd functions to aoc
+* move arg functions to aoc
