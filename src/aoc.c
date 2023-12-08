@@ -2,6 +2,8 @@
 #include "aoc_int_arr.c"
 #include <stdarg.h>
 
+#define STR_T_MIN_CAPACITY 16
+
 typedef struct {
     char* data;
     size_t capacity;
@@ -25,6 +27,25 @@ str_t str_copy(str_t str) {
         .owns_data=true};
     memcpy(r.data, str.data, str.size);
     return r;
+}
+
+str_t str_substr(str_t str, int start, int length) {
+    size_t size = length > 0 ? length : str.size - start + length + 1;
+    return (str_t){ 
+        .data=str.data + start,
+        .size=size,
+        .is_valid=str.is_valid,
+        .owns_data=false};
+}
+
+str_t str_lstrip(str_t str) {
+    str_t res = str;
+    res.owns_data = false;
+    while (res.size && is_white_space(res.data[0])) {
+        res.data++;
+        res.size--;
+    }
+    return res;
 }
 
 bool str_iter_is_end(str_iter_t* iter) {
@@ -353,7 +374,8 @@ str_t str_ref(char* cstr) {
 str_t str_new(char* cstr) {
     str_t res = {0};
     size_t len = strlen(cstr);
-    res.data = malloc(len);
+    size_t capacity = max_size_t(len, STR_T_MIN_CAPACITY);
+    res.data = malloc(capacity);
     res.size = len;
     res.is_valid = true;
     res.owns_data = true;
@@ -380,8 +402,9 @@ str_t str_cat(str_t a, str_t b) {
     return str;
 }
 
-void str_grow(str_t* str, size_t new_capacity) {
+void str_grow(str_t* str, size_t new_size) {
     assert(str->owns_data);
+    size_t new_capacity = max_size_t(new_size, STR_T_MIN_CAPACITY);
     str->data = realloc(str->data, new_capacity);
 }
 
@@ -430,7 +453,7 @@ static str_format_pattern_list_t str_format_patterns = {0};
 str_t _str_format_callback_str(va_list* args, str_t specifier) {
     (void) specifier;
     str_t arg = va_arg(*args, str_t);
-    return arg;
+    return str_copy(arg);
 }   
 
 str_t _str_format_callback_cstr(va_list* args, str_t specifier) {

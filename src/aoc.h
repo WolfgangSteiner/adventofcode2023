@@ -27,6 +27,8 @@ str_t str_copy(str_t str);
 
 static inline s64 min_s64(s64 a, s64 b) { return a < b ? a : b; }
 static inline s64 max_s64(s64 a, s64 b) { return a > b ? a : b; }
+static inline size_t min_size_t(size_t a, size_t b) { return a < b ? a : b; }
+static inline size_t max_size_t(size_t a, size_t b) { return a > b ? a : b; }
 
 
 int str_to_int(str_t str);
@@ -38,6 +40,7 @@ bool str_contains_char(str_t, char);
 // create new str by referencing cstr
 // new str does not own memory
 str_t str_ref(char* cstr);
+str_t str_substr(str_t, int, int);
 
 // create new str by copying cstr data
 str_t str_new(char* cstr);
@@ -51,6 +54,8 @@ void str_append_space(str_t* str);
 void str_append_char(str_t* str, char c);
 char* str_cstr(str_t str);
 char* str_copy_to_cstr(str_t str);
+
+str_t str_lstrip(str_t);
 
 typedef str_t(*str_format_callback_t)(va_list*, str_t pattern);
 str_t str_format(str_t fmt, ...); 

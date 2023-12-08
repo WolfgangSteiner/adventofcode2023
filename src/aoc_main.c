@@ -46,7 +46,8 @@ extern s64 part_one(str_t);
 extern s64 part_two(str_t);
 
 void check_part_one() {
-    str_t data = read_file(get_part_one_test_file_name(day));
+    str_t file_name = get_part_one_test_file_name(day);
+    str_t data = read_file(file_name);
     s64 res = part_one(data);
     printf("test:     ");
     if (res != part_one_test_value) {
@@ -54,10 +55,13 @@ void check_part_one() {
     } else {
         printf("pass\n");
     }
+    str_free(file_name);
+    str_free(data);
 }
 
 void check_part_two() {
-    str_t data = read_file(get_part_two_test_file_name(day));
+    str_t file_name = get_part_two_test_file_name(day);
+    str_t data = read_file(file_name);
     s64 res = part_two(data);
     printf("test:     ");
     if (res != part_two_test_value) {
@@ -65,6 +69,8 @@ void check_part_two() {
     } else {
         printf("pass\n");
     }
+    str_free(file_name);
+    str_free(data);
 }
 
 void compute_part_one(str_t data) {
@@ -87,7 +93,8 @@ void compute_part_two(str_t data) {
 
 int main(int, char**) {
     assert(is_digit(day[0]));
-    str_t data = read_file(get_input_file_name(day));
+    str_t file_name = get_input_file_name(day);
+    str_t data = read_file(file_name);
     printf("\n");
     printf("Part one:\n");
     printf("=====================\n");
@@ -98,4 +105,6 @@ int main(int, char**) {
     printf("=====================\n");
     check_part_two();
     compute_part_two(data);
+    str_free(file_name);
+    str_free(data);    
 }
