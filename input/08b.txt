@@ -1,0 +1,10 @@
+LR
+
+WWA = (WWB, XXX)
+WWB = (XXX, WWZ)
+WWZ = (WWB, XXX)
+SSA = (SSB, XXX)
+SSB = (SSC, SSC)
+SSC = (SSZ, SSZ)
+SSZ = (SSB, SSB)
+XXX = (XXX, XXX)

@@ -40,7 +40,7 @@ bool str_contains_char(str_t, char);
 // create new str by referencing cstr
 // new str does not own memory
 str_t str_ref(char* cstr);
-str_t str_substr(str_t, int, int);
+str_t str_substr(str_t, int start, int length);
 
 // create new str by copying cstr data
 str_t str_new(char* cstr);

@@ -8,6 +8,7 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
+typedef uint16_t u16;
 typedef uint32_t u32;
 typedef int64_t s64;
 typedef __int128 s128;

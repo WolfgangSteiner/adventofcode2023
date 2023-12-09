@@ -462,6 +462,18 @@ str_t _str_format_callback_cstr(va_list* args, str_t specifier) {
     return str_new(arg);
 }
 
+str_t _str_format_callback_u16(va_list* args, str_t specifier) {
+    if (str_eq(specifier, str_ref("hex"))) {
+        int arg = va_arg(*args, int);
+        char* buffer = _get_cstr_buffer(32);
+        sprintf(buffer, "%x", arg);
+        return str_new(buffer);
+    } else {
+        int arg = va_arg(*args, int);
+        return str_from_int(arg);
+    }
+}
+
 str_t _str_format_callback_int(va_list* args, str_t specifier) {
     if (str_eq(specifier, str_ref("hex"))) {
         int arg = va_arg(*args, int);
