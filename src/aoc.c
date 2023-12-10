@@ -2,6 +2,9 @@
 #include "aoc_int_arr.c"
 #include <stdarg.h>
 
+#include "grid.c"
+
+
 #define STR_T_MIN_CAPACITY 16
 
 typedef struct {
@@ -671,54 +674,6 @@ char* str_copy_to_cstr(str_t str) {
     char* cstr = calloc(str.size + 1, sizeof(char));
     memcpy(cstr, str.data, str.size);
     return cstr;
-}
-
-grid_t grid_from_str(str_t str) {
-    str_iter_t iter = str_iter_begin(&str);
-    bool is_first_line = true;
-    grid_t g = {0};
-    while(!str_iter_is_end(&iter)) {
-        str_t line = get_line(&iter);
-        if (is_first_line) {
-            g.width = line.size;     
-        }
-        grid_add_row(&g, line);
-    }
-
-    return g;
-}
-
-void grid_add_row(grid_t* g, str_t row) {
-    if (g->data == 0) {
-        g->data = malloc(1024);
-        g->capacity = 1024;
-    } else if (g->capacity <= g->width * (g->height + 1)) {
-        g->capacity *= 2;
-        g->data = realloc(g->data, g->capacity);
-    }
-    assert(g->width == row.size);
-    memcpy(g->data + g->width * g->height, row.data, g->width);
-    g->height++;
-}
-
-void grid_print(grid_t* g) {
-    for (int row = 0; row < g->height; ++row) {
-        char* row_ptr = g->data + row * g->height;
-        for (int col = 0; col < g->width; ++col) {
-            putchar(row_ptr[col]);
-        }
-        putchar('\n');
-    } 
-}
-
-char grid_at(grid_t grid, int x, int y) {
-    assert(x < grid.width && y < grid.height);
-    return grid.data[y*grid.width + x];
-}
-
-char* grid_pointer_at(grid_t grid, int x, int y) {
-    assert(x < grid.width && y < grid.height);
-    return grid.data + y*grid.width + x;
 }
 
 s64 pow_s64(int base, int exponent) {

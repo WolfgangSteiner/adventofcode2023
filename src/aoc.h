@@ -18,10 +18,6 @@ typedef struct {
     str_t* str;
     int pos; } str_iter_t;
 
-typedef struct {
-    char* data;
-    size_t capacity;
-    int width, height; } grid_t;
 
 str_t str_copy(str_t str);
 
@@ -107,11 +103,6 @@ void check_part_two();
 void compute_part_one();
 void compute_part_two();
 
-grid_t grid_from_str(str_t str);
-void grid_add_row(grid_t* g, str_t row);
-void grid_print(grid_t* g);
-char grid_at(grid_t grid, int x, int y);
-char* grid_pointer_at(grid_t grid, int x, int y);
 
 s64 pow_s64(int base, int exponent);
 
