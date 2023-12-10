@@ -257,8 +257,16 @@ int str_iter_match_int(str_iter_t* iter) {
 
 s64 str_iter_match_s64(str_iter_t* iter) {
     s64 res = 0;
+    s64 sign = 1;
     if (str_iter_is_white_space(iter)) {
         str_iter_match_white_space(iter);
+    }
+    char c = str_iter_get_char(iter);
+    if (c == '-') {
+        sign = -1;
+        str_iter_inc(iter);
+    } else if (c == '+') {
+        str_iter_inc(iter);
     }
     while (!str_iter_is_end(iter)) {
         char c = str_iter_get_char(iter);
@@ -269,7 +277,7 @@ s64 str_iter_match_s64(str_iter_t* iter) {
           break;
         }
     }    
-    return res;
+    return sign * res;
 }
 
 bool str_iter_match_white_space(str_iter_t* iter) {
@@ -355,7 +363,8 @@ int_arr_t str_iter_match_int_list(str_iter_t* iter) {
 
     while (!str_iter_is_end(iter)) {
         str_iter_match_white_space(iter);
-        if (!str_iter_is_digit(iter)) break; 
+        char c = str_iter_get_char(iter);
+        if (!is_digit(c) && c!='-' && c!='+') break; 
         s64 v = str_iter_match_s64(iter);
         int_arr_push(&r, v);
     }
