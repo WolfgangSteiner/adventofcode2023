@@ -15,6 +15,21 @@ grid_t grid_from_str(str_t str) {
     return g;
 }
 
+grid_t grid_new(int width, int height) {
+    return (grid_t) {
+        .data=calloc(width*height, 1),
+        .width=width,
+        .height=height,
+        .capacity=width*height
+    };
+}
+
+grid_t grid_free(grid_t* g) {
+    if (g->data) free(g->data);
+    g->data = 0;
+    g->capacity = 0;
+}
+
 void grid_add_row(grid_t* g, str_t row) {
     if (g->data == 0) {
         g->data = malloc(1024);
