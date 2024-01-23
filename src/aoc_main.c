@@ -1,5 +1,6 @@
 #include "aoc.h"
 #include <time.h>
+#include "test.h"
 
 typedef struct {
     double start_time, end_time;
@@ -44,6 +45,7 @@ extern char* day;
 extern s64 part_one_test_value, part_two_test_value;
 extern s64 part_one(str_t);
 extern s64 part_two(str_t);
+extern void run_tests();
 
 void check_part_one() {
     str_t file_name = get_part_one_test_file_name(day);
@@ -93,6 +95,7 @@ void compute_part_two(str_t data) {
 
 int main(int, char**) {
     assert(is_digit(day[0]));
+    run_tests();
     str_t file_name = get_input_file_name(day);
     str_t data = read_file(file_name);
     printf("\n");

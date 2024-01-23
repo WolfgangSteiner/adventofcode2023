@@ -3,6 +3,18 @@
 #include <stdarg.h>
 
 #include "grid.c"
+#include "strarr.c"
+
+
+s64 pow_s64(s64 b, s64 e) {
+    if (e == 0) return 1;
+    if (b == 0) return 0;
+    s64 res = b;
+    for (int i = 1; i < e; i++) {
+        res *= b;
+    }
+    return res;
+}
 
 
 #define STR_T_MIN_CAPACITY 16
@@ -49,6 +61,28 @@ str_t str_lstrip(str_t str) {
         res.size--;
     }
     return res;
+}
+
+str_t str_lstrip_char(str_t str, char c) {
+    str_t res = str;
+    res.owns_data = false;
+    while (res.size && *res.data == c) {
+        res.data++;
+        res.size--;
+    }
+    return res;
+}
+
+str_t str_rstrip_char(str_t str, char c) {
+    str_t res = str;
+    res.owns_data = false;
+    while (res.size && res.data[res.size-1] == c) res.size--;
+    return res;
+}
+
+str_t str_strip_char(str_t str, char c) {
+    str_t res = str_lstrip_char(str, c);
+    return str_rstrip_char(res, c);
 }
 
 bool str_iter_is_end(str_iter_t* iter) {
@@ -137,6 +171,29 @@ bool str_contains_char(str_t str, char c) {
     return false;
 }
 
+str_t str_reduce_char_spans(str_t str, char c) {
+    str_t res = str_copy(str);
+    char* r = str.data;
+    char* w = res.data;
+    res.size = 0;
+    bool is_in_span = false;
+    for (int i = 0; i < str.size; ++i) {
+        char ic = *r++;
+        if (ic == c) {
+            if (!is_in_span) {
+                is_in_span = true;
+                *w++ = ic;
+                res.size++;
+            }
+        } else {
+            is_in_span = false;
+            *w++ = ic;
+            res.size++;
+        }
+    }
+    return res;
+}
+
 bool str_eq(str_t a, str_t b) {
     if (a.size != b.size) return false;
     return memcmp(a.data, b.data, a.size) == 0;
@@ -191,11 +248,16 @@ s64 str_to_s64(str_t str)
 
 char str_get_char(str_t str, size_t pos) { return str.data[pos]; }
 char str_iter_get_char(str_iter_t* iter) { return iter->str->data[iter->pos]; }
+void str_iter_set_char(str_iter_t* iter, char c) {
+    assert(!str_iter_is_end(iter));
+    iter->str->data[iter->pos] = c;
+}
+
 void str_iter_inc(str_iter_t* iter) { iter->pos++; }
 void str_iter_dec(str_iter_t* iter) { iter->pos--; }
 
-str_iter_t str_find_char(str_t str, char c) {
-    str_iter_t iter = str_iter_begin(&str);
+str_iter_t str_find_char(str_t* str, char c) {
+    str_iter_t iter = str_iter_begin(str);
     while (!str_iter_is_end(&iter)) {
         if (str_iter_get_char(&iter) == c) return iter;
         str_iter_inc(&iter);
@@ -203,8 +265,27 @@ str_iter_t str_find_char(str_t str, char c) {
     return iter;
 }
 
+str_iter_t str_find_char_from_back(str_t* str, char c) {
+    str_iter_t iter = str_iter_rbegin(str);
+    while (!str_iter_is_rend(&iter)) {
+        if (str_iter_get_char(&iter) == c) return iter;
+        str_iter_dec(&iter);
+    }
+    return iter;
+}
+
+str_iter_t str_find_any_char(str_t str, str_t chars) {
+    str_iter_t iter = str_iter_begin(&str);
+    while (!str_iter_is_end(&iter)) {
+        char c = str_iter_get_char(&iter);
+        if (str_contains_char(chars, c)) return iter;
+        str_iter_inc(&iter);
+    }
+    return iter;
+}
+
 str_t str_split_tail_at_char(str_t str, char c) {
-    str_iter_t iter = str_find_char(str, c);
+    str_iter_t iter = str_find_char(&str, c);
     // the char is not in the string
     if (str_iter_is_end(&iter)) return str_ref("");
     str_iter_inc(&iter);
@@ -307,6 +388,16 @@ bool str_iter_match_char(str_iter_t* iter, char match) {
     }
 }
 
+bool str_iter_match_any_char(str_iter_t* iter, str_t chars) {
+    if (str_iter_is_end(iter)) return false;
+    if (str_contains_char(chars, str_iter_get_char(iter))) {
+        str_iter_inc(iter);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool str_iter_match_newline(str_iter_t* iter) {
     return str_iter_match_char(iter, '\n');
 }
@@ -365,6 +456,8 @@ int_arr_t str_iter_match_int_list(str_iter_t* iter) {
     int_arr_t r = int_arr_create();
 
     while (!str_iter_is_end(iter)) {
+        str_iter_match_white_space(iter);
+        str_iter_match_any_char(iter, str_ref(","));
         str_iter_match_white_space(iter);
         char c = str_iter_get_char(iter);
         if (!is_digit(c) && c!='-' && c!='+') break; 
@@ -612,9 +705,7 @@ str_format_callback_t _str_format_get_callback_for_key(str_t key) {
     return 0;
 }
 
-str_t str_format(str_t fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
+str_t _str_vformat(str_t fmt, va_list* args) {
     // find patterns of form {TYPE}, where type is str, int, s64, f32
     // replace with value of type
     str_iter_t iter = str_iter_begin(&fmt);
@@ -627,7 +718,7 @@ str_t str_format(str_t fmt, ...) {
             str_t specifier = _str_format_pattern_get_format_specifier(pattern);
             str_format_callback_t callback = _str_format_get_callback_for_key(key);
             if (callback) {
-                str_t value = callback(&args, specifier);
+                str_t value = callback(args, specifier);
                 str_append(&result, value);
                 str_free(value);
             } else {
@@ -640,10 +731,29 @@ str_t str_format(str_t fmt, ...) {
             str_iter_inc(&iter);
         }
     }
-    va_end(args);
 
     return result;
 }
+
+
+str_t str_format(str_t fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    str_t res = _str_vformat(fmt, &args);
+    va_end(args);
+    return res;
+}
+
+
+void str_print_format(str_t fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    str_t res = _str_vformat(fmt, &args);
+    str_print(res);
+    str_free(res);
+    va_end(args);
+}
+
 
 void str_append_char(str_t* str, char c) {
     size_t new_size = str->size + 1;
@@ -674,14 +784,4 @@ char* str_copy_to_cstr(str_t str) {
     char* cstr = calloc(str.size + 1, sizeof(char));
     memcpy(cstr, str.data, str.size);
     return cstr;
-}
-
-s64 pow_s64(int base, int exponent) {
-    if (exponent == 0) return 1;
-
-    s64 res = base;
-    for (int i = 0; i < exponent - 1; ++i) {
-        res*=base;
-    }
-    return res;
 }

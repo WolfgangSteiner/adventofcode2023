@@ -8,7 +8,7 @@
 #include "aoc_int_arr.h"
 #include "aoc_base.h"
 
-typedef struct {
+typedef struct str_t {
     char* data;
     size_t size;
     bool is_valid;
@@ -25,7 +25,7 @@ static inline s64 min_s64(s64 a, s64 b) { return a < b ? a : b; }
 static inline s64 max_s64(s64 a, s64 b) { return a > b ? a : b; }
 static inline size_t min_size_t(size_t a, size_t b) { return a < b ? a : b; }
 static inline size_t max_size_t(size_t a, size_t b) { return a > b ? a : b; }
-
+s64 pow_s64(s64, s64);
 
 int str_to_int(str_t str);
 s64 str_to_s64(str_t str);
@@ -33,6 +33,8 @@ char str_at(str_t str, int idx);
 char str_get_char(str_t str, size_t pos);
 bool str_contains(str_t, str_t);
 bool str_contains_char(str_t, char);
+static inline bool str_starts_with_char(str_t s, char c) { return s.size && s.data[0] == c; }
+static inline bool str_ends_with_char(str_t s, char c) { return s.size && s.data[s.size-1] == c; }
 // create new str by referencing cstr
 // new str does not own memory
 str_t str_ref(char* cstr);
@@ -52,14 +54,22 @@ char* str_cstr(str_t str);
 char* str_copy_to_cstr(str_t str);
 
 str_t str_lstrip(str_t);
+str_t str_lstrip_char(str_t, char);
+str_t str_rstrip_char(str_t, char);
+str_t str_strip_char(str_t, char);
 
 typedef str_t(*str_format_callback_t)(va_list*, str_t pattern);
 str_t str_format(str_t fmt, ...); 
+void str_print_format(str_t fmt, ...);
 void str_format_register_pattern(str_t pattern, str_format_callback_t callback);
 
-str_iter_t str_find_char(str_t str, char c);
+str_iter_t str_find_char(str_t* str, char c);
+str_iter_t str_find_char_from_back(str_t* str, char c);
+str_iter_t str_find_any_char(str_t str, str_t chars);
 str_t str_split_tail_at_char(str_t str, char c);
 bool str_eq(str_t a, str_t b);
+str_t str_reduce_char_spans(str_t, char);
+
 
 bool str_iter_is_end(str_iter_t* iter);
 bool str_iter_is_rend(str_iter_t* iter);
@@ -77,6 +87,7 @@ bool is_word_separator(char c);
 bool is_newline(char c);
 
 char str_iter_get_char(str_iter_t* iter);
+void str_iter_set_char(str_iter_t* iter, char c);
 void str_iter_inc(str_iter_t* iter);
 void str_iter_dec(str_iter_t* iter);
 bool str_iter_match(str_iter_t* iter, str_t match_str);
@@ -87,6 +98,7 @@ bool str_iter_is_digit(str_iter_t* iter);
 bool str_iter_is_white_space(str_iter_t* iter);
 bool str_iter_match_white_space(str_iter_t* iter);
 bool str_iter_match_char(str_iter_t* iter, char match);
+bool str_iter_match_any_char(str_iter_t* iter, str_t chars);
 bool str_iter_match_newline(str_iter_t* iter);
 str_t str_iter_match_up_to_char(str_iter_t* iter, char match);
 str_t str_iter_match_word(str_iter_t* iter);
@@ -102,8 +114,5 @@ void check_part_one();
 void check_part_two();
 void compute_part_one();
 void compute_part_two();
-
-
-s64 pow_s64(int base, int exponent);
 
 #endif

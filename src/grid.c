@@ -24,7 +24,7 @@ grid_t grid_new(int width, int height) {
     };
 }
 
-grid_t grid_free(grid_t* g) {
+void grid_free(grid_t* g) {
     if (g->data) free(g->data);
     g->data = 0;
     g->capacity = 0;

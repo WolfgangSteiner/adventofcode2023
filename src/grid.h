@@ -23,7 +23,7 @@ typedef u32 grid_cell_id_t;
 
 grid_t grid_from_str(str_t str);
 grid_t grid_new(int width, int height);
-grid_t grid_free(grid_t*);
+void grid_free(grid_t*);
 
 static inline grid_cell_id_t grid_cell_id_make(int x, int y) { return (y << 16) + x; }
 grid_neighbors_t grid_neighbors(grid_t g, grid_cell_id_t id, bool include_diagonals);
